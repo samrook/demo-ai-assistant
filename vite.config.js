@@ -5,11 +5,24 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
     plugins: [
         laravel({
-            input: ['resources/css/app.css', 'resources/js/app.js'],
+            input: 'resources/js/app.ts',
             refresh: true,
         }),
         tailwindcss(),
+        vue({
+            template: {
+                transformAssetUrls: {
+                    base: null,
+                    includeAbsolute: false,
+                },
+            },
+        }),
     ],
+    resolve: {
+        alias: {
+            '@': '/resources/js',
+        },
+    },
     server: {
         watch: {
             ignored: ['**/storage/framework/views/**'],

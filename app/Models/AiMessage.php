@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\AiMessageRole;
 use App\Enums\AiMessageStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -19,6 +20,7 @@ class AiMessage extends Model
 
     protected $casts = [
         'status' => AiMessageStatus::class,
+        'role' => AiMessageRole::class,
         'used_rag' => 'boolean',
         'metadata' => 'array',
     ];

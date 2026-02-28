@@ -18,6 +18,7 @@ return [
         'url' => env('OPEN_WEBUI_URL'),
         'key' => env('OPEN_WEBUI_API_KEY'),
         'collection_id' => env('OPEN_WEBUI_COLLECTION_ID', 'laravel-docs'),
+        'model' => env('OPEN_WEBUI_MODEL', 'llama3'),
     ],
 
     'postmark' => [

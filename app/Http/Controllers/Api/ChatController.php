@@ -27,7 +27,7 @@ class ChatController extends Controller
         $conversation = AiConversation::create([
             'user_id' => $request->user()?->id,
             'title' => Str::limit($data['prompt'], 30),
-            'model_used' => 'laravel-12-expert',
+            'model_used' => config('services.open_webui.model'),
         ]);
 
         $this->processPrompt($conversation, $data);

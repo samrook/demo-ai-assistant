@@ -25,19 +25,21 @@ class AppServiceProvider extends ServiceProvider
     {
         Vite::prefetch(concurrency: 3);
 
-        Http::globalRequestMiddleware(function (Request $request): Request {
-            $method = $request->getMethod();
-            $uri = (string) $request->getUri();
-            $body = $request->getBody();
+        if (config('app.debug')) {
+            Http::globalRequestMiddleware(function (Request $request): Request {
+                $method = $request->getMethod();
+                $uri = (string) $request->getUri();
+                $body = $request->getBody();
 
-            Log::debug("{$method} {$uri}", ['request' => [
-                'headers' => $request->getHeaders(),
-                'body' => $body->getContents(),
-            ]]);
+                Log::debug("{$method} {$uri}", ['request' => [
+                    'headers' => $request->getHeaders(),
+                    'body' => $body->getContents(),
+                ]]);
 
-            $body->rewind();
+                $body->rewind();
 
-            return $request;
-        });
+                return $request;
+            });
+        }
     }
 }

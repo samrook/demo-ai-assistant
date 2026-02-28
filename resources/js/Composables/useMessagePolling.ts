@@ -1,6 +1,6 @@
 import { ref } from 'vue';
 import axios from 'axios';
-import { Message } from '@/types';
+import { Message } from '@/Types';
 
 export function useMessagePolling() {
     const isPolling = ref(false);

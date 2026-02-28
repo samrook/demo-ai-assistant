@@ -3,7 +3,7 @@ import { ref, nextTick, onMounted } from 'vue';
 import axios from 'axios';
 import { useMessagePolling } from '@/Composables/useMessagePolling';
 import { renderMarkdown } from '@/Utils/Markdown';
-import { Conversation, Message } from '@/types';
+import { Conversation, Message } from '@/Types';
 
 declare function route(name: string, params?: any): string;
 

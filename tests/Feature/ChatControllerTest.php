@@ -63,10 +63,10 @@ it('returns the status of a specific message for frontend polling', function () 
     $response = actingAs($this->user)->getJson(route('message.status', $message->id));
 
     $response->assertStatus(200)
-             ->assertJson([
-                 'status' => 'processing',
-                 'content' => null,
-             ]);
+        ->assertJsonFragment([
+            'content' => null,
+            'status' => 'processing',
+        ]);
 });
 
 it('creates a new conversation, dispatches the job, and redirects to the chat page', function () {

@@ -11,6 +11,7 @@ use App\Jobs\GenerateAiResponse;
 use App\Models\AiConversation;
 use App\Models\AiMessage;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 
@@ -40,6 +41,8 @@ class ChatController extends Controller
 
     public function status(AiMessage $message)
     {
+        $message->load('conversation');
+
         Gate::authorize('view', $message->conversation);
 
         return new AiMessageResource($message);

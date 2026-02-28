@@ -69,6 +69,31 @@ it('returns the status of a specific message for frontend polling', function () 
         ]);
 });
 
+it('returns 401 when an unauthenticated user polls a message status', function () {
+    $message = AiMessage::create([
+        'ai_conversation_id' => $this->conversation->id,
+        'role' => AiMessageRole::ASSISTANT,
+        'status' => AiMessageStatus::PROCESSING,
+    ]);
+
+    $response = $this->getJson(route('message.status', $message->id));
+
+    $response->assertUnauthorized();
+});
+
+it('returns 403 when another authenticated user polls a message they do not own', function () {
+    $message = AiMessage::create([
+        'ai_conversation_id' => $this->conversation->id,
+        'role' => AiMessageRole::ASSISTANT,
+        'status' => AiMessageStatus::PROCESSING,
+    ]);
+    $otherUser = User::factory()->create();
+
+    $response = actingAs($otherUser)->getJson(route('message.status', $message->id));
+
+    $response->assertForbidden();
+});
+
 it('creates a new conversation, dispatches the job, and redirects to the chat page', function () {
     Queue::fake();
 

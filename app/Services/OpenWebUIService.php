@@ -3,9 +3,12 @@
 namespace App\Services;
 
 use App\Models\AiConversation;
+use App\Models\AiMessage;
+use Exception;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
-use Exception;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 
 class OpenWebUIService
 {
@@ -19,21 +22,23 @@ class OpenWebUIService
         $token = config('services.open_webui.key');
         $model = $conversation->model_used;
 
+        /**
+         * @var Collection<int, AiMessage> $messages
+         */
         $messages = $conversation->messages()
             ->where('status', 'completed')
             ->orderBy('created_at', 'asc')
-            ->get()
-            ->map(function ($message) {
-                return [
-                    'role' => $message->role->value,
-                    'content' => $message->content,
-                ];
-            })
+            ->get();
+
+        $messagesArray = $messages->map(fn (AiMessage $message): array => [
+                'role' => $message->role->value,
+                'content' => $message->content,
+            ])
             ->toArray();
 
         $payload = [
             'model' => $model,
-            'messages' => $messages,
+            'messages' => $messagesArray,
         ];
 
         if ($useRag) {
@@ -67,7 +72,6 @@ class OpenWebUIService
             ];
 
         } catch (ConnectionException $e) {
-            dd($e);
             throw new Exception('Could not connect to Open WebUI.');
         }
     }

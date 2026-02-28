@@ -13,7 +13,7 @@ class StoreMessageRequest extends FormRequest
     public function authorize(): bool
     {
         /**
-         * @var AiConversation $conversation
+         * @var AiConversation|null $conversation
          */
         $conversation = $this->route('conversation');
         

@@ -57,6 +57,9 @@ class ChatController extends Controller
             'used_rag' => $data['use_rag'] ?? false,
         ]);
 
+        /**
+         * @var AiMessage $assistantMessage
+         */
         $assistantMessage = $conversation->messages()->create([
             'role' => AiMessageRole::ASSISTANT,
             'content' => null,

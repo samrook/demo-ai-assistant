@@ -1,59 +1,107 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+<h1 align="center">Laravel AI Assistant 🧠⚡</h1>
 
 <p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+  <strong>A modern, asynchronous AI chat interface bridging a Vue 3 frontend with a locally hosted LLM via Laravel queues.</strong>
 </p>
 
-## About Laravel
+<p align="center">
+  <img src="https://img.shields.io/badge/Laravel-12-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel 12">
+  <img src="https://img.shields.io/badge/Vue.js-3.0-4FC08D?style=for-the-badge&logo=vue.js&logoColor=white" alt="Vue 3">
+  <img src="https://img.shields.io/badge/PHPStan-Level%20Max-4F5B93?style=for-the-badge&logo=php&logoColor=white" alt="PHPStan Max">
+  <img src="https://img.shields.io/badge/Tailwind-v4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS">
+</p>
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 🚀 Overview
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+A bespoke Single Page Application (SPA) built to mimic the ChatGPT experience, but wired directly into a local, self-hosted Large Language Model (running on an AMD RX 6700 XT). 
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Unlike standard synchronous API calls that block the PHP worker and cause browser timeouts, this application uses an **event-driven, asynchronous queueing architecture**.
 
-## Learning Laravel
+<p align="center">
+  <img src="docs/new-chat.png" width="48%" alt="Empty Chat Interface">
+  &nbsp;
+  <img src="docs/syntax-highlighting.png" width="48%" alt="AI Markdown & Syntax Highlighting">
+</p>
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+### ✨ Key Features
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+* **Optimistic UI Updates:** Instant user feedback in the DOM before the server even responds.
+* **Asynchronous Polling:** The Vue frontend recursively polls a lightweight status endpoint while the heavy GPU processing happens in a Laravel background job.
+* **Smart Markdown Engine:** Real-time markdown rendering using `markdown-it` and `shiki` (v1.0+) with dynamic language chunking to keep the initial JS bundle tiny.
+* **RAG Context Toggling:** Users can selectively append Laravel 12 documentation to their prompts, with the UI remembering their preference per conversation.
+* **Bulletproof Codebase:** Analyzed with PHPStan at **Level Max (9)**, ensuring strict types, zero unhandled nulls, and highly predictable logic.
 
-## Laravel Sponsors
+## 🛠️ Tech Stack
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+* **Backend:** Laravel 12, PHP 8.3+, Valkey (Redis alternative for Queues), SQLite/MySQL
+* **Frontend:** Vue 3 (Composition API / TypeScript), Inertia.js, Tailwind CSS v4
+* **AI Integration:** Open WebUI / Ollama API
+* **Testing & Quality:** Pest PHP (TDD), PHPStan (Level Max)
 
-### Premium Partners
+## 🚦 Getting Started
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### Prerequisites
+* Docker Desktop (for Laravel Sail)
+* Node.js & NPM
+* A local instance of Ollama/Open WebUI running an LLM (e.g., `llama3` or `laravel-expert`).
 
-## Contributing
+### Installation
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+1. **Clone the repository:**
+   ```bash
+   git clone [https://github.com/samrook/demo-ai-assistant.git](https://github.com/samrook/demo-ai-assistant.git)
+   cd demo-ai-assistant
+   ```
 
-## Code of Conduct
+2. **Install PHP dependencies:**
+    ```bash
+    docker run --rm \
+        -u "$(id -u):$(id -g)" \
+        -v "$(pwd):/var/www/html" \
+        -w /var/www/html \
+        laravelsail/php84-composer:latest \
+        composer install --ignore-platform-reqs
+    ```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+3. **Configure the environment:**
+    ```bash
+    cp .env.example .env
+    ```
+    *Make sure to update OPEN_WEBUI_URL and OPEN_WEBUI_API_KEY in your .env to point to your local AI instance.*
 
-## Security Vulnerabilities
+4. **Start the Sail containers:**
+    ```bash
+    ./vendor/bin/sail up -d
+    ./vendor/bin/sail artisan key:generate
+    ./vendor/bin/sail artisan migrate:fresh --seed
+    ```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+5. **Install frontend assets:**
+    ```bash
+    ./vendor/bin/sail npm install
+    ./vendor/bin/sail npm run dev
+    ```
 
-## License
+6. **Start the Queue Worker (Crucial):**
+    *Because AI generation is heavy, it runs in the background. You must start the queue worker to process messages.*
+    ```bash
+    ./vendor/bin/sail artisan queue:work
+    ```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+7. **Visit the app:** Open `http://localhost` and log in with the seeded test user (`test@example.com` / `password`).
+
+## 🧪 Testing & Code Quality
+
+The application was built using strict Test-Driven Development.
+
+**Run the test suite:**
+
+```bash
+./vendor/bin/sail artisan test
+```
+
+**Run Static Analysis (Level Max):**
+
+```bash
+./vendor/bin/sail vendor/bin/phpstan analyse
+```

@@ -18,7 +18,7 @@ class StoreMessageRequest extends FormRequest
         $conversation = $this->route('conversation');
         
         return $conversation
-            ? $this->user()->can('update', $conversation)
+            ?  ($this->user()?->can('update', $conversation) ?? false)
             : true;
     }
 

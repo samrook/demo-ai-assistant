@@ -50,6 +50,9 @@ class AiMessage extends Model
         'metadata' => 'array',
     ];
 
+    /**
+     * @return BelongsTo<AiConversation, $this>
+     */
     public function conversation(): BelongsTo
     {
         return $this->belongsTo(AiConversation::class, 'ai_conversation_id');

@@ -11,6 +11,9 @@ use Illuminate\Http\Resources\Json\JsonResource;
  */
 class AiMessageResource extends JsonResource
 {
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(Request $request): array
     {
         return [
@@ -20,7 +23,7 @@ class AiMessageResource extends JsonResource
             'status' => $this->status->value,
             'used_rag' => $this->used_rag,
             'metadata' => $this->metadata,
-            'created_at' => $this->created_at->diffForHumans(),
+            'created_at' => $this->created_at?->diffForHumans(),
         ];
     }
 }

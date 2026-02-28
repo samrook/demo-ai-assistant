@@ -77,6 +77,9 @@ class User extends Authenticatable implements MustVerifyEmailContract
         ];
     }
 
+    /**
+     * @return HasMany<AiConversation, $this>
+     */
     public function conversations(): HasMany
     {
         return $this->hasMany(AiConversation::class)->latest('updated_at');

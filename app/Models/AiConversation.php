@@ -35,11 +35,17 @@ class AiConversation extends Model
         'model_used',
     ];
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * @return HasMany<AiMessage, $this>
+     */
     public function messages(): HasMany
     {
         return $this->hasMany(AiMessage::class);

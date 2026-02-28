@@ -18,7 +18,14 @@ class OpenWebUIService
      */
     public function generateResponse(AiConversation $conversation, bool $useRag = false): array
     {
-        $url = config('services.open_webui.url') . '/chat/completions';
+        /**
+         * @var string $baseUrl
+         */
+        $baseUrl = config('services.open_webui.url');
+        $url = $baseUrl . '/chat/completions';
+        /**
+         * @var string $token
+         */
         $token = config('services.open_webui.key');
         $model = $conversation->model_used;
 
@@ -59,14 +66,54 @@ class OpenWebUIService
                 throw new Exception('Open WebUI API Error: ' . $response->body());
             }
 
+            /**
+             * @var array{
+             *  "id": string,
+             *  "created": int,
+             *  "model": string,
+             *  "object": string,
+             *  "choices": array<
+             *      int, array{
+             *          "index": int,
+             *          "logprobs": string|null,
+             *          "finish_reason": string,
+             *          "message": array{
+             *              "role": string,
+             *              "content": string
+             *          }
+             *      }
+             *  >,
+             *  "usage": array{
+             *      "input_tokens": int,
+             *      "output_tokens": int,
+             *      "total_tokens": int,
+             *      "prompt_tokens": int,
+             *      "completion_tokens": int,
+             *      "response_token/s": float,
+             *      "prompt_token/s": float,
+             *      "total_duration": int,
+             *      "load_duration": int,
+             *      "prompt_eval_count": int,
+             *      "prompt_eval_duration": int,
+             *      "eval_count": int,
+             *      "eval_duration": int,
+             *      "approximate_total": string,
+             *      "completion_tokens_details": array{
+             *          "reasoning_tokens": int,
+             *          "accepted_prediction_tokens": int,
+             *          "rejected_prediction_tokens": int
+             *      }
+             *  }
+             * } $data
+             */
             $data = $response->json();
 
             return [
-                'content' => $data['choices'][0]['message']['content'] ?? '',
+                'content' => $data['choices'][0]['message']['content'],
                 'metadata' => [
-                    'prompt_tokens' => $data['usage']['prompt_tokens'] ?? 0,
-                    'completion_tokens' => $data['usage']['completion_tokens'] ?? 0,
-                    'total_tokens' => $data['usage']['total_tokens'] ?? 0,
+                    'prompt_tokens' => $data['usage']['prompt_tokens'],
+                    'completion_tokens' => $data['usage']['completion_tokens'],
+                    'total_tokens' => $data['usage']['total_tokens'],
                     'model_used' => $model,
                 ],
             ];

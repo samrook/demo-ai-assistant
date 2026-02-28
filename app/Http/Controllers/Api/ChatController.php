@@ -19,10 +19,13 @@ class ChatController extends Controller
 {
     public function store(StoreMessageRequest $request): RedirectResponse
     {
+        /**
+         * @var array{"prompt": string, "use_rag": bool|null} $data
+         */
         $data = $request->validated();
 
         $conversation = AiConversation::create([
-            'user_id' => $request->user()->id,
+            'user_id' => $request->user()?->id,
             'title' => Str::limit($data['prompt'], 30),
             'model_used' => 'laravel-12-expert',
         ]);
@@ -32,14 +35,18 @@ class ChatController extends Controller
         return redirect()->route('chat.show', $conversation->id);
     }
 
-    public function storeMessage(StoreMessageRequest $request, AiConversation $conversation)
+    public function storeMessage(StoreMessageRequest $request, AiConversation $conversation): AiMessageResource
     {
-        $message = $this->processPrompt($conversation, $request->validated());
+        /**
+         * @var array{"prompt": string, "use_rag": bool|null} $data
+         */
+        $data = $request->validated();
+        $message = $this->processPrompt($conversation, $data);
 
         return new AiMessageResource($message);
     }
 
-    public function status(AiMessage $message)
+    public function status(AiMessage $message): AiMessageResource
     {
         $message->load('conversation');
 
@@ -48,6 +55,9 @@ class ChatController extends Controller
         return new AiMessageResource($message);
     }
 
+    /**
+     * @param array{"prompt": string, "use_rag": bool|null} $data
+     */
     private function processPrompt(AiConversation $conversation, array $data): AiMessage
     {
         $conversation->messages()->create([

@@ -40,7 +40,7 @@ class OpenWebUIService
             $payload['files'] = [
                 [
                     'type' => 'collection',
-                    'id' => config('services.openwebui.collection_id')
+                    'id' => config('services.open_webui.collection_id')
                 ]
             ];
         }

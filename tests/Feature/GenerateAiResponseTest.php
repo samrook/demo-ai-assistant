@@ -20,7 +20,6 @@ beforeEach(function () {
 });
 
 it('processes a pending message and updates it to completed', function () {
-    // 1. Arrange: Create a 'pending' assistant message
     $message = AiMessage::create([
         'ai_conversation_id' => $this->conversation->id,
         'role' => AiMessageRole::ASSISTANT,
@@ -29,9 +28,7 @@ it('processes a pending message and updates it to completed', function () {
         'used_rag' => true,
     ]);
 
-    // Mock the Service so we don't actually hit the API
-    // We already proved the service works in OpenWebUIServiceTest!
-    $this->mock(OpenWebUIService::class, function (MockInterface $mock) {
+    mock(OpenWebUIService::class, function (MockInterface $mock) {
         $mock->shouldReceive('generateResponse')
             ->once()
             ->andReturn([
@@ -40,11 +37,9 @@ it('processes a pending message and updates it to completed', function () {
             ]);
     });
 
-    // 2. Act: Run the job synchronously
     $job = new GenerateAiResponse($message);
     app()->call([$job, 'handle']);
 
-    // 3. Assert: Check the database was updated
     $message->refresh();
     
     expect($message->status)->toBe(AiMessageStatus::COMPLETED)
@@ -60,13 +55,12 @@ it('marks the message as failed if the service throws an exception', function ()
         'used_rag' => false,
     ]);
 
-    $this->mock(OpenWebUIService::class, function (MockInterface $mock) {
+    mock(OpenWebUIService::class, function (MockInterface $mock) {
         $mock->shouldReceive('generateResponse')
             ->once()
             ->andThrow(new Exception('GPU Out of Memory'));
     });
 
-    // We expect Laravel's logger to catch the error
     Log::shouldReceive('error')->once();
 
     $job = new GenerateAiResponse($message);

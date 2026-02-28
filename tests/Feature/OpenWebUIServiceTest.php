@@ -52,6 +52,8 @@ it('formats a standard request and parses the response', function () {
 });
 
 it('injects the knowledge base collection when RAG is enabled', function () {
+    config()->set('services.open_webui.collection_id', 'laravel-docs-test');
+
     Http::fake([
         '*/api/chat/completions' => Http::response([
             'choices' => [['message' => ['content' => 'Docs used.']]],
@@ -75,6 +77,7 @@ it('injects the knowledge base collection when RAG is enabled', function () {
         $payload = $request->data();
         return isset($payload['files']) 
             && $payload['files'][0]['type'] === 'collection'
-            && $payload['files'][0]['id'] === config('services.openwebui.collection_id');
+            && isset($payload['files'][0]['id'])
+            && $payload['files'][0]['id'] === config('services.open_webui.collection_id');
     });
 });

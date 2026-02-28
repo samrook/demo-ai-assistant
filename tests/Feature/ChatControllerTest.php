@@ -6,6 +6,7 @@ use App\Jobs\GenerateAiResponse;
 use App\Models\AiConversation;
 use App\Models\AiMessage;
 use App\Models\User;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Queue;
 
 use function Pest\Laravel\actingAs;
@@ -94,20 +95,96 @@ it('returns 403 when another authenticated user polls a message they do not own'
     $response->assertForbidden();
 });
 
-it('creates a new conversation, dispatches the job, and redirects to the chat page', function () {
-    Queue::fake();
+it('returns 401 when an unauthenticated user creates a new conversation', function () {
+    $response = $this->postJson(route('chat.store'), [
+        'prompt' => 'Hello from guest',
+        'use_rag' => false,
+    ]);
 
-    $response = actingAs($this->user)->post(route('chat.store'), [
-        'prompt' => 'How do I install Vue in Laravel?',
+    $response->assertUnauthorized();
+});
+
+it('returns 401 when an unauthenticated user posts a message to a conversation', function () {
+    $response = $this->postJson(route('chat-message.store', $this->conversation->id), [
+        'prompt' => 'Guest message',
+        'use_rag' => false,
+    ]);
+
+    $response->assertUnauthorized();
+});
+
+it('returns 403 when another authenticated user posts to a conversation they do not own', function () {
+    $otherUser = User::factory()->create();
+
+    $response = actingAs($otherUser)->postJson(route('chat-message.store', $this->conversation->id), [
+        'prompt' => 'Trying to post to another user conversation',
+        'use_rag' => false,
+    ]);
+
+    $response->assertForbidden();
+});
+
+it('validates that prompt is required when posting a message', function () {
+    $response = actingAs($this->user)->postJson(route('chat-message.store', $this->conversation->id), [
         'use_rag' => true,
     ]);
 
-    assertDatabaseHas('ai_conversations', [
-        'user_id' => $this->user->id,
-        'title' => 'How do I install Vue in Larave...',
+    $response->assertUnprocessable()
+        ->assertJsonValidationErrors(['prompt']);
+});
+
+it('validates that prompt is at most 5000 characters', function () {
+    $response = actingAs($this->user)->postJson(route('chat-message.store', $this->conversation->id), [
+        'prompt' => str_repeat('a', 5001),
+        'use_rag' => false,
+    ]);
+
+    $response->assertUnprocessable()
+        ->assertJsonValidationErrors(['prompt']);
+});
+
+it('validates that use_rag is a boolean value', function () {
+    $response = actingAs($this->user)->postJson(route('chat-message.store', $this->conversation->id), [
+        'prompt' => 'Check boolean validation',
+        'use_rag' => 'not-a-boolean',
+    ]);
+
+    $response->assertUnprocessable()
+        ->assertJsonValidationErrors(['use_rag']);
+});
+
+it('allows the owner to view the web chat page', function () {
+    $response = actingAs($this->user)->get(route('chat.show', $this->conversation->id));
+
+    $response->assertOk();
+});
+
+it('returns 403 when another user tries to view the web chat page', function () {
+    $otherUser = User::factory()->create();
+
+    $response = actingAs($otherUser)->get(route('chat.show', $this->conversation->id));
+
+    $response->assertForbidden();
+});
+
+it('creates a new conversation, dispatches the job, and redirects to the chat page', function () {
+    Queue::fake();
+    $prompt = 'How do I install Vue in Laravel?';
+
+    $response = actingAs($this->user)->post(route('chat.store'), [
+        'prompt' => $prompt,
+        'use_rag' => true,
     ]);
 
     $conversation = AiConversation::latest('id')->first();
+
+    assertDatabaseHas('ai_conversations', [
+        'user_id' => $this->user->id,
+        'title' => Str::limit($prompt, 30),
+    ]);
+
+    expect($conversation)->not->toBeNull();
+    expect($conversation->title)->toBe(Str::limit($prompt, 30));
 
     $response->assertRedirect(route('chat.show', $conversation->id));
 

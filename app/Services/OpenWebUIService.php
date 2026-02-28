@@ -29,6 +29,18 @@ class OpenWebUIService
         $token = config('services.open_webui.key');
         $model = $conversation->model_used;
 
+        $systemPrompt = view('prompts.system', [
+            'user' => $conversation->user,
+            'useRag' => $useRag,
+        ])->render();
+
+        $messagesArray = [
+            [
+                'role' => 'system',
+                'content' => $systemPrompt,
+            ],
+        ];
+
         /**
          * @var Collection<int, AiMessage> $messages
          */
@@ -37,11 +49,12 @@ class OpenWebUIService
             ->orderBy('created_at', 'asc')
             ->get();
 
-        $messagesArray = $messages->map(fn (AiMessage $message): array => [
+        foreach ($messages as $message) {
+            $messagesArray[] = [
                 'role' => $message->role->value,
                 'content' => $message->content,
-            ])
-            ->toArray();
+            ];
+        }
 
         $payload = [
             'model' => $model,

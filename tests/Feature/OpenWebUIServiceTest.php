@@ -57,7 +57,11 @@ it('injects the knowledge base collection when RAG is enabled', function () {
     Http::fake([
         '*/api/chat/completions' => Http::response([
             'choices' => [['message' => ['content' => 'Docs used.']]],
-            'usage' => ['total_tokens' => 50]
+            'usage' => [
+                'prompt_tokens' => 10,
+                'completion_tokens' => 20,
+                'total_tokens' => 30,
+            ]
         ], 200)
     ]);
 

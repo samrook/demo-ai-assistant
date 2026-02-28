@@ -47,6 +47,37 @@ it('processes a pending message and updates it to completed', function () {
         ->and($message->metadata['total_tokens'])->toBe(150);
 });
 
+it('touches conversation updated_at while processing assistant response', function () {
+    $message = AiMessage::create([
+        'ai_conversation_id' => $this->conversation->id,
+        'role' => AiMessageRole::ASSISTANT,
+        'content' => null,
+        'status' => AiMessageStatus::PENDING,
+        'used_rag' => false,
+    ]);
+
+    $this->conversation->forceFill([
+        'updated_at' => now()->subHour(),
+    ])->save();
+    $before = $this->conversation->updated_at;
+
+    $this->mock(OpenWebUIService::class, function (MockInterface $mock) {
+        $mock->shouldReceive('generateResponse')
+            ->once()
+            ->andReturn([
+                'content' => 'Assistant output.',
+                'metadata' => ['total_tokens' => 42],
+            ]);
+    });
+
+    $job = new GenerateAiResponse($message);
+    app()->call([$job, 'handle']);
+
+    $this->conversation->refresh();
+
+    expect($this->conversation->updated_at->greaterThan($before))->toBeTrue();
+});
+
 it('marks the message as failed if the service throws an exception', function () {
     $message = AiMessage::create([
         'ai_conversation_id' => $this->conversation->id,
@@ -70,4 +101,33 @@ it('marks the message as failed if the service throws an exception', function ()
     
     expect($message->status)->toBe(AiMessageStatus::FAILED)
         ->and($message->content)->toBeNull();
+});
+
+it('touches conversation updated_at when generation fails', function () {
+    $message = AiMessage::create([
+        'ai_conversation_id' => $this->conversation->id,
+        'role' => AiMessageRole::ASSISTANT,
+        'status' => AiMessageStatus::PENDING,
+        'used_rag' => false,
+    ]);
+
+    $this->conversation->forceFill([
+        'updated_at' => now()->subHour(),
+    ])->save();
+    $before = $this->conversation->updated_at;
+
+    $this->mock(OpenWebUIService::class, function (MockInterface $mock) {
+        $mock->shouldReceive('generateResponse')
+            ->once()
+            ->andThrow(new Exception('Service unavailable'));
+    });
+
+    Log::shouldReceive('error')->once();
+
+    $job = new GenerateAiResponse($message);
+    app()->call([$job, 'handle']);
+
+    $this->conversation->refresh();
+
+    expect($this->conversation->updated_at->greaterThan($before))->toBeTrue();
 });

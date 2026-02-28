@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, nextTick, onMounted } from 'vue';
+import { ref, nextTick, onMounted, onUnmounted } from 'vue';
 import axios from 'axios';
 import { useMessagePolling } from '@/Composables/useMessagePolling';
 import { renderMarkdown } from '@/Utils/Markdown';
@@ -21,9 +21,7 @@ const useRag = ref(
     lastUserMessage ? Boolean(lastUserMessage.used_rag) : false
 );
 
-console.log({lastUserMessage, useRag});
-
-const { pollStatus, isPolling } = useMessagePolling();
+const { pollStatus, stopPolling, isPolling } = useMessagePolling();
 
 const scrollToBottom = async () => {
     await nextTick();
@@ -49,6 +47,10 @@ onMounted(() => {
     if (lastMsg && (lastMsg.status === 'pending' || lastMsg.status === 'processing')) {
         startPolling(lastMsg.id);
     }
+});
+
+onUnmounted(() => {
+    stopPolling();
 });
 
 const submitPrompt = async () => {

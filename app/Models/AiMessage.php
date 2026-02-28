@@ -34,6 +34,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class AiMessage extends Model
 {
+    /**
+     * Keep parent conversation recency aligned with message activity.
+     *
+     * @var array<int, string>
+     */
+    protected $touches = ['conversation'];
+
     protected $fillable = [
         'ai_conversation_id',
         'role',

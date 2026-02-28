@@ -35,7 +35,10 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
             ],
             'conversations' => $request->user() 
-                ? $request->user()->conversations()->select('id', 'title')->get() 
+                ? $request->user()->conversations()
+                    ->select('id', 'title')
+                    ->orderByDesc('updated_at')
+                    ->get()
                 : [],
         ];
     }

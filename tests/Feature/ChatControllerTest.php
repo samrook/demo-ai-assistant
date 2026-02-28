@@ -54,6 +54,24 @@ it('stores a user prompt, creates a pending assistant message, and dispatches th
     });
 });
 
+it('touches conversation updated_at when a new message is posted', function () {
+    Queue::fake();
+
+    $this->conversation->forceFill([
+        'updated_at' => now()->subHour(),
+    ])->save();
+    $before = $this->conversation->updated_at;
+
+    actingAs($this->user)->postJson(route('chat-message.store', $this->conversation->id), [
+        'prompt' => 'Bump conversation activity timestamp',
+        'use_rag' => false,
+    ])->assertStatus(201);
+
+    $this->conversation->refresh();
+
+    expect($this->conversation->updated_at->greaterThan($before))->toBeTrue();
+});
+
 it('returns the status of a specific message for frontend polling', function () {
     $message = AiMessage::create([
         'ai_conversation_id' => $this->conversation->id,

@@ -29,17 +29,40 @@ class AppServiceProvider extends ServiceProvider
             Http::globalRequestMiddleware(function (Request $request): Request {
                 $method = $request->getMethod();
                 $uri = (string) $request->getUri();
-                $body = $request->getBody();
 
                 Log::debug("{$method} {$uri}", ['request' => [
-                    'headers' => $request->getHeaders(),
-                    'body' => $body->getContents(),
+                    'headers' => $this->redactHeaders($request->getHeaders()),
+                    'body' => '[REDACTED]',
                 ]]);
-
-                $body->rewind();
 
                 return $request;
             });
         }
+    }
+
+    /**
+     * @param  array<string, array<int, string>>  $headers
+     * @return array<string, array<int, string>>
+     */
+    private function redactHeaders(array $headers): array
+    {
+        $sensitiveHeaders = [
+            'authorization',
+            'proxy-authorization',
+            'cookie',
+            'set-cookie',
+            'x-api-key',
+            'x-auth-token',
+        ];
+
+        $redacted = [];
+
+        foreach ($headers as $name => $values) {
+            $redacted[$name] = in_array(strtolower($name), $sensitiveHeaders, true)
+                ? ['[REDACTED]']
+                : $values;
+        }
+
+        return $redacted;
     }
 }

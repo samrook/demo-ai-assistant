@@ -1,7 +1,9 @@
 import MarkdownIt from 'markdown-it';
 import { createHighlighter } from 'shiki';
 
-const md = new MarkdownIt();
+const md = new MarkdownIt({
+    html: false,
+});
 let highlighter: any = null;
 
 export async function renderMarkdown(content: string) {
@@ -23,8 +25,11 @@ export async function renderMarkdown(content: string) {
                     theme: 'nord' 
                 });
             } catch (e) {
-                // Fallback to plain text if the AI spits out an unknown language
-                return code;
+                // Markdown-it treats highlight output as HTML, so escape fallback content.
+                const safeCode = md.utils.escapeHtml(code);
+                const safeLang = md.utils.escapeHtml(lang || 'text');
+
+                return `<pre><code class="language-${safeLang}">${safeCode}</code></pre>`;
             }
         }
     });

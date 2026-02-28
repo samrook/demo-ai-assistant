@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\Api\ChatController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('chat')->group(function () {

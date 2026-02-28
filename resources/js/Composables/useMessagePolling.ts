@@ -1,35 +1,59 @@
-import { ref } from 'vue';
+import { onBeforeUnmount, ref } from 'vue';
 import axios from 'axios';
 import { Message } from '@/Types';
 
 export function useMessagePolling() {
     const isPolling = ref(false);
+    const activeMessageId = ref<number | null>(null);
+    const timeoutId = ref<ReturnType<typeof setTimeout> | null>(null);
+
+    const stopPolling = () => {
+        if (timeoutId.value) {
+            clearTimeout(timeoutId.value);
+            timeoutId.value = null;
+        }
+
+        activeMessageId.value = null;
+        isPolling.value = false;
+    };
 
     const pollStatus = async (messageId: number, onUpdate: (msg: Message) => void) => {
+        stopPolling();
+        activeMessageId.value = messageId;
         isPolling.value = true;
         
         const check = async () => {
+            if (activeMessageId.value !== messageId) {
+                return;
+            }
+
             try {
                 const { data } = await axios.get(`/api/message/${messageId}/status`);
                 const message: Message = data.data || data;
 
+                if (activeMessageId.value !== messageId) {
+                    return;
+                }
+
                 onUpdate(message);
 
                 if (message.status === 'completed' || message.status === 'failed') {
-                    isPolling.value = false;
+                    stopPolling();
                     return;
                 }
 
                 // Wait 2 seconds and check again
-                setTimeout(check, 2000);
+                timeoutId.value = setTimeout(check, 2000);
             } catch (error) {
                 console.error('Polling failed', error);
-                isPolling.value = false;
+                stopPolling();
             }
         };
 
         await check();
     };
 
-    return { pollStatus, isPolling };
+    onBeforeUnmount(stopPolling);
+
+    return { pollStatus, stopPolling, isPolling };
 }

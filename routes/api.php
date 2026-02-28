@@ -12,10 +12,6 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('message', [ChatController::class, 'storeMessage'])->name('chat-message.store');
         });
     });
-
-    Route::get('/dashboard', function () {
-        return Inertia::render('Dashboard');
-    })->name('dashboard');
     
     Route::get('/message/{message}/status', [ChatController::class, 'status'])->name('message.status');
 });

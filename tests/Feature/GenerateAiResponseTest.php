@@ -28,7 +28,7 @@ it('processes a pending message and updates it to completed', function () {
         'used_rag' => true,
     ]);
 
-    mock(OpenWebUIService::class, function (MockInterface $mock) {
+    $this->mock(OpenWebUIService::class, function (MockInterface $mock) {
         $mock->shouldReceive('generateResponse')
             ->once()
             ->andReturn([
@@ -55,7 +55,7 @@ it('marks the message as failed if the service throws an exception', function ()
         'used_rag' => false,
     ]);
 
-    mock(OpenWebUIService::class, function (MockInterface $mock) {
+    $this->mock(OpenWebUIService::class, function (MockInterface $mock) {
         $mock->shouldReceive('generateResponse')
             ->once()
             ->andThrow(new Exception('GPU Out of Memory'));

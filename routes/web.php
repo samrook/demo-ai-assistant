@@ -20,7 +20,7 @@ Route::middleware('auth')->group(function () {
 
     // Breeze routes
     Route::get('/dashboard', function () {
-        return Inertia::render('Dashboard');
+        return Inertia::render('Chat/Index');
     })->middleware(['verified'])->name('dashboard');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

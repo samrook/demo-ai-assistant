@@ -24,7 +24,7 @@ class ChatController extends Controller
         $conversation = AiConversation::create([
             'user_id' => $request->user()->id,
             'title' => Str::limit($data['prompt'], 30),
-            'model_used' => 'laravel-expert',
+            'model_used' => 'laravel-12-expert',
         ]);
 
         $this->processPrompt($conversation, $data);
@@ -54,7 +54,7 @@ class ChatController extends Controller
             'role' => AiMessageRole::USER,
             'content' => $data['prompt'],
             'status' => AiMessageStatus::COMPLETED,
-            'used_rag' => false,
+            'used_rag' => $data['use_rag'] ?? false,
         ]);
 
         $assistantMessage = $conversation->messages()->create([

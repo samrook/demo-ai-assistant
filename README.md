@@ -49,7 +49,7 @@ Unlike standard synchronous API calls that block the PHP worker and cause browse
 
 1. **Clone the repository:**
    ```bash
-   git clone [https://github.com/samrook/demo-ai-assistant.git](https://github.com/samrook/demo-ai-assistant.git)
+   git clone https://github.com/samrook/demo-ai-assistant.git
    cd demo-ai-assistant
    ```
 

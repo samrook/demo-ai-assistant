@@ -46,7 +46,7 @@ it('formats a standard request and parses the response', function () {
         ->and($result['metadata']['total_tokens'])->toBe(30);
 
     Http::assertSent(function ($request) {
-        return $request->url() === config('services.open_webui.url') . '/chat/completions'
+        return $request->url() === config('services.open_webui.url') . '/api/chat/completions'
             && !isset($request->data()['files']);
     });
 });
